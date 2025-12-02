@@ -1,3 +1,4 @@
+#include <asm-generic/errno-base.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -14,7 +15,8 @@ void print_mkrepo_usage()
     char* message = "styx mkrepo: initialize a styx repository\n\n"
                     "usage: styx mkrepo [option(s)]\n\n"
                     "options: \n\t[-h][--help] \tprint this help message and exit\n"
-                            "\t[-p][--path] \tinitialize a repository at the given path\n";
+                            "\t[-p][--path] \tinitialize a repository at the given path\n"
+                            "\t[-b][--branch] \tspecify the name of the initial branch\n\n";
 
     printf("%s\n", message);
 }
@@ -69,20 +71,21 @@ int mkrepo(const char* path, const char* branch) {
     char fullpath[PATH_MAX];
     snprintf(fullpath, sizeof(fullpath), "%s/%s", normalized, styx);
 
-    if (mkdir(fullpath, 0755) != 0) {
-        if (errno == EEXIST) {
-            fprintf(stderr, "error: a repository already exists at %s\n", fullpath);
-        } else {
-            perror("error: could not create repository");
-        }
-
+    if (mkdir(fullpath, 0755) != 0 && errno != EEXIST) {
+        perror("error: could not create repository");
         return 1;
+    }
+
+    if (errno == EEXIST) {
+        printf("styx repository reinitialized at %s\n", fullpath);
+    } else {
+        printf("initialized styx repository at %s\n", fullpath);
     }
     
     char dcommits[PATH_MAX];
     snprintf(dcommits, sizeof(dcommits), "%scommits", fullpath);
 
-    if (mkdir(dcommits, 0755) != 0) {
+    if (mkdir(dcommits, 0755) != 0 && errno != EEXIST) {
         perror("error: could not create commits directory");
         return 1;
     }
@@ -90,7 +93,7 @@ int mkrepo(const char* path, const char* branch) {
     char dbranches[PATH_MAX];
     snprintf(dbranches, sizeof(dbranches), "%sbranches", fullpath);
 
-    if (mkdir(dbranches, 0755) != 0) {
+    if (mkdir(dbranches, 0755) != 0 && errno != EEXIST) {
         perror("error: could not create branches directory");
         return 1;
     }
@@ -120,8 +123,6 @@ int mkrepo(const char* path, const char* branch) {
         fprintf(bf, "%s\n", branch);
     }
     fclose(bf);
-
-    printf("styx repository initialized at %s\n", fullpath);
 
     return 0;
 }
