@@ -8,9 +8,10 @@
 
 void print_styx_usage() 
 {
-    char* message = "sytx: a git implementation project\n\n"
+    char* message = "sytx: a very basic implementation of git\n\n"
                     "usage: styx <command> [option(s)]\n\n"
-                    "commands: \n\tmkrepo \t\tinitalize a styx repository\n\n"
+                    "commands: \n\tmkrepo \t\tinitalize a styx repository\n"
+                                "\tsee:\n\t  'styx mkrepo --help' for more info\n\n"
                     "options: \n\t[-h][--help] \tprint this help message and exit\n";
 
     printf("%s\n", message);
@@ -44,8 +45,7 @@ void parse_mkrepo_args(int argc, char** argv, int opts)
                 branch = optarg;
                 break;
             case '?':
-                fprintf(stderr, "error: unknown option\n");
-                fprintf(stderr, "try: styx mkrepo --help for a list of options\n");
+                fprintf(stderr, "\ntry: styx mkrepo --help for a list of options\n");
                 exit(1);
             default:
                 exit(1);
@@ -62,9 +62,23 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
-        print_styx_usage();
-        exit(0);
+    // check for commands first
+    // if the first arg doesnt start with a '-', it should be a command
+    if (argv[1][0] != '-') {
+        char* command = argv[1];
+        
+        // pass args to parse_mkrepo
+        // pass 2 as offset because argv[0] = styx
+        // argv[1] = mkrepo so other args start at argv[2]
+        if (strcmp(command, "mkrepo") == 0) {
+            parse_mkrepo_args(argc, argv, 2);
+            return 0;
+        } else {
+            fprintf(stderr, "error: unknown command '%s'\n\n", command);
+            fprintf(stderr, "try: styx --help for a list of commands\n");
+
+            return 1;
+        }
     }
 
     static struct option styx[] = {
@@ -80,24 +94,11 @@ int main(int argc, char** argv)
                 print_styx_usage();
                 exit(0);
             case '?':
-                fprintf(stderr, "error: unknown command\n");
+                fprintf(stderr, "error: unknown command '%s'\n\n", argv[1]);
                 fprintf(stderr, "try: styx --help for a list of commands\n");
                 break;
             default:
                 break;
-        }
-    }
-
-    if (argv[1][0] != '-') {
-        char* command = argv[1];
-        if (strcmp(command, "mkrepo") == 0) {
-            parse_mkrepo_args(argc, argv, 2);
-            return 0;
-        } else {
-            fprintf(stderr, "error: unknown command '%s'\n", command);
-            print_styx_usage();
-
-            return 1;
         }
     }
     print_styx_usage();
