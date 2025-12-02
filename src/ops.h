@@ -3,9 +3,8 @@
 
 #include <stdio.h>
 
-int init();
-int init_at_path(const char* path);
-void print_init_usage();
+int mkrepo(const char* path, const char* branch);
+void print_mkrepo_usage();
 
 int add(FILE* file, char** flags);
 
