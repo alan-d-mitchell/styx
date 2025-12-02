@@ -5,7 +5,7 @@ TARGET = styx
 SRC_DIR = src
 BIN_DIR = bin
 
-SRC = $(SRC_DIR)/styx.c $(SRC_DIR)/init.c $(SRC_DIR)/add.c
+SRC = $(SRC_DIR)/styx.c $(SRC_DIR)/mkrepo.c $(SRC_DIR)/add.c
 OBJ = $(SRC:.c=.o)
 
 build: $(BIN_DIR)/$(TARGET)
